@@ -1,10 +1,7 @@
-// Terminal Puzzle Game script.js
-
 const terminal = document.getElementById("terminal");
-const inputContainer = document.getElementById("input-container");
 const input = document.getElementById("input");
+
 let currentPhase = 0;
-let history = [];
 
 const phases = [
   {
@@ -71,9 +68,8 @@ const phases = [
 function printLine(text, delay = 30, callback) {
   const line = document.createElement("div");
   terminal.appendChild(line);
-  terminal.scrollTop = terminal.scrollHeight;
-
   let i = 0;
+
   function typeChar() {
     if (i < text.length) {
       line.textContent += text[i++];
@@ -83,31 +79,30 @@ function printLine(text, delay = 30, callback) {
       callback();
     }
   }
+
   typeChar();
 }
 
 function printPrompt() {
   const prompt = document.createElement("div");
   prompt.className = "prompt-line";
-  prompt.innerHTML = `<span class='green'>agent@shr</span>:~$ <span id='active-input'></span>`;
+  prompt.innerHTML = `<span class='green'>agent@shr</span>:~$ `;
   terminal.appendChild(prompt);
   terminal.scrollTop = terminal.scrollHeight;
 }
 
 function processInput(value) {
-  printLine(`agent@shr:~$ ${value}`);
+  if (!value.trim()) return;
+
+  const echo = document.createElement("div");
+  echo.textContent = `agent@shr:~$ ${value}`;
+  terminal.appendChild(echo);
+
   if (value.trim().toLowerCase() === phases[currentPhase].expected) {
     currentPhase++;
     if (currentPhase < phases.length) {
       setTimeout(() => {
-        function printMessages(index) {
-          if (index < phases[currentPhase].messages.length) {
-            printLine(phases[currentPhase].messages[index], 30, () => printMessages(index + 1));
-          } else {
-            printPrompt();
-          }
-        }
-        printMessages(0);
+        printMessages(phases[currentPhase].messages, 0);
       }, 300);
     } else {
       printLine("Mission complete.");
@@ -115,29 +110,30 @@ function processInput(value) {
   } else {
     printLine("Access denied. Try again.");
   }
+
   input.value = "";
+  terminal.scrollTop = terminal.scrollHeight;
 }
 
-input.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    const value = input.value;
-    if (value) {
-      processInput(value);
-    }
-  }
-});
-
-// Initial boot
-function startBootMessages(index = 0) {
-  if (index < phases[0].messages.length) {
-    printLine(phases[0].messages[index], 30, () => startBootMessages(index + 1));
+function printMessages(messages, index) {
+  if (index < messages.length) {
+    printLine(messages[index], 30, () => printMessages(messages, index + 1));
   } else {
     printPrompt();
   }
 }
-startBootMessages();
 
-// Keep prompt at bottom
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    processInput(input.value);
+  }
+});
+
+function start() {
+  printMessages(phases[0].messages, 0);
+}
+start();
+
 const observer = new MutationObserver(() => {
   input.focus();
 });
