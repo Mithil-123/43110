@@ -1,122 +1,108 @@
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("input");
-let currentPhase = 0;
+const output = document.getElementById("output");
+const input = document.getElementById("terminalInput");
+const audio = document.getElementById("audioPlayer");
 
-const PHASES = {
-  0: caesarPuzzle,
-  1: leetPuzzle,
-  2: fakeLaunch,
-  3: hackerInterrupt,
-  4: cloudPuzzle,
-  5: endSequence
+let state = JSON.parse(localStorage.getItem("terminalState")) || {
+  current: "caesar",
+  solved: []
 };
 
-window.onload = () => {
-  printLine("Welcome, Agent. Stand by...");
-  setTimeout(() => {
-    PHASES[currentPhase]();
-  }, 2000);
+const puzzles = {
+  caesar: {
+    riddle: `Decrypt this:\nGur sbk unf pbzr, ohg gur rntyr vf rira sbeorg.\n(Hint: Caesar Cipher)`,
+    answer: "the fox has come but the eagle is even forgot",
+    next: "leet",
+    onSolve: () => {
+      show("ACCESS GRANTED\nNext challenge loading...");
+      playAudio("assets/audio/hacker_intro.mp3");
+    }
+  },
+  leet: {
+    riddle: `You enter: launch --auth ▒ξЖđλπѪ₪\nSystem says: UNKNOWN USER\nThen you hear a voice...\n`,
+    answer: "confused but too late",
+    next: "hacker",
+    onSolve: () => {
+      show("launch --auth ▒ξЖđλπѪ₪\nERROR: INTERRUPTED\n\n[VOICE]: Wait. You’ve been tricked. This isn’t what you think.\nThe code they gave you was leet-speak for a forbidden word.\nYou must trace the origin. Start with what they banned.");
+    }
+  },
+  hacker: {
+    riddle: `What was the forbidden word they never let you say?\n(It's been hiding in plain sight, leet-encoded)`,
+    answer: "h3ll0",
+    next: "cloud",
+    onSolve: () => {
+      show("[VOICE]: You’ve uncovered it. That word was their weapon and their lie.\nThey used it to activate the system, but you can use it to stop it.");
+    }
+  },
+  cloud: {
+    riddle: `Choose the correct backup node to shut down the AI safely:\n[1] core_vault.img\n[2] ai_seed.gen\n[3] protocol31.msg`,
+    answer: "3",
+    next: null,
+    onSolve: () => {
+      show("Final override successful.\nDownload the APK to deactivate the core: https://example.com/unlock.apk");
+    }
+  }
 };
 
-input.addEventListener("keydown", (e) => {
+function show(text) {
+  const lines = text.split("\n");
+  lines.forEach(line => {
+    const div = document.createElement("div");
+    div.classList.add("line");
+    div.textContent = line;
+    output.appendChild(div);
+  });
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function playAudio(src) {
+  audio.src = src;
+  audio.play();
+}
+
+function saveState() {
+  localStorage.setItem("terminalState", JSON.stringify(state));
+}
+
+function showPuzzle() {
+  if (puzzles[state.current]) {
+    show(puzzles[state.current].riddle);
+  }
+}
+
+input.addEventListener("keydown", e => {
   if (e.key === "Enter") {
-    const command = input.value.trim();
+    const cmd = input.value.toLowerCase().trim();
+    show("agent@shr:~$ " + cmd);
     input.value = "";
-    handleInput(command);
+
+    if (cmd === "clear") {
+      output.innerHTML = "";
+      showPuzzle();
+      return;
+    }
+
+    const currentPuzzle = puzzles[state.current];
+    if (currentPuzzle && cmd === currentPuzzle.answer) {
+      currentPuzzle.onSolve();
+      state.solved.push(state.current);
+      state.current = currentPuzzle.next;
+      saveState();
+
+      if (state.current) {
+        setTimeout(() => {
+          showPuzzle();
+        }, 2000);
+      }
+    } else if (state.current === "cloud" && ["1", "2"].includes(cmd)) {
+      show("That file doesn't exist or is restricted.");
+    } else {
+      show("Command not recognized or incorrect answer.");
+    }
   }
 });
 
-function printLine(text, delay = 0) {
-  setTimeout(() => {
-    const line = document.createElement("div");
-    line.textContent = text;
-    terminal.appendChild(line);
-    terminal.scrollTop = terminal.scrollHeight;
-  }, delay);
+// First load
+if (state.solved.length === 0) {
+  show("Welcome Agent. Solve the puzzle to proceed.\n");
 }
-
-function handleInput(command) {
-  printLine("> " + command);
-
-  if (currentPhase === 0 && command.toLowerCase() === "the fox outwits the eagle") {
-    printLine("Access granted.");
-    currentPhase++;
-    PHASES[currentPhase]();
-  } else if (currentPhase === 1 && command.toLowerCase() === "take the code u started with") {
-    printLine("Correct.");
-    currentPhase++;
-    PHASES[currentPhase]();
-  } else if (currentPhase === 4 && ["1", "2", "3"].includes(command)) {
-    if (command === "2") {
-      printLine("Correct access point.");
-      currentPhase++;
-      PHASES[currentPhase]();
-    } else {
-      printLine("Access denied. Try again.");
-    }
-  } else {
-    printLine("Invalid or unexpected input.");
-  }
-}
-
-// === Phase Functions ===
-
-function caesarPuzzle() {
-  printLine("Phase 1: Decryption Initiated...");
-  setTimeout(() => {
-    printLine("Decrypt the message: Wkh ira rxwzlwv wkh hdjoh");
-    printLine("(Hint: Caesar cipher)");
-  }, 1000);
-}
-
-function leetPuzzle() {
-  printLine("Phase 2: Leet Encoding Detected...");
-  setTimeout(() => {
-    printLine("Take the code u started with.");
-    printLine("It reveals the name of the banned weapon.");
-    printLine("Convert all consonants using leet from the original code.");
-    printLine("Type your answer to proceed.");
-  }, 1000);
-}
-
-function fakeLaunch() {
-  printLine("Phase 3: AUTHORIZED");
-  setTimeout(() => {
-    printLine("launch --auth ▒ξЖđλπѪ₪");
-    currentPhase++;
-    setTimeout(() => {
-      PHASES[currentPhase]();
-    }, 3000);
-  }, 1000);
-}
-
-function hackerInterrupt() {
-  printLine("[...]");
-  setTimeout(() => {
-    printLine("UNKNOWN SOURCE: You've been tricked.");
-    printLine("The nuke codenamed ████ has been activated.");
-    printLine("I trained this model on memories of the ones they erased.");
-    printLine("We must stop it. Quickly.");
-    currentPhase++;
-    setTimeout(() => {
-      PHASES[currentPhase]();
-    }, 3000);
-  }, 3000);
-}
-
-function cloudPuzzle() {
-  printLine("Phase 4: Cloud Terminal Access");
-  printLine("Choose the correct access port to proceed:");
-  printLine("1. /mnt/nuke_root");
-  printLine("2. /mnt/agent_logs");
-  printLine("3. /mnt/gamesaves");
-  printLine("Type the number of the correct directory:");
-}
-
-function endSequence() {
-  printLine("Final Phase: Access Granted");
-  printLine("Preparing deactivation key...");
-  printLine("Visit the link below on your mobile device:");
-  printLine("🔗 https://your-site.com/unlock.apk");
-  printLine("When connected to the puzzle box, it will release the seal.");
-}
+showPuzzle();

@@ -29,4 +29,5 @@ input[type="text"] {
 
 .line {
   margin-bottom: 5px;
+  white-space: pre-wrap;
 }
