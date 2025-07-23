@@ -4,18 +4,9 @@ const terminal = document.getElementById("terminal");
 const input = document.getElementById("input");
 let currentPhase = 0;
 let history = [];
-let countdownTime = 15 * 60; // 5 minutes
+let countdownTime = 5 * 60; // 5 minutes
 let countdownInterval;
 let inputDisabled = false;
-let audio = new Audio();
-
-const audioMap = {
-  0: "audio/0.mp3",
-  3: "audio/3.mp3",
-  7: "audio/7.mp3",
-  10: "audio/10.mp3",
-  13: "audio/13.mp3"
-};
 
 const phases = [
   {
@@ -130,6 +121,7 @@ const phases = [
         "> Researchers refused to comply with external demands.",
         "> Final transmission logged.",
         "> System sealed. Project scrubbed from public record.",
+
         "\nroot@h3ll0: ‘Some memory seems to be corupted, lets open the logs we might find what went wrong.’",
         "root@h3ll0: ‘Run: cat status.log’"
     ],
@@ -158,6 +150,7 @@ const phases = [
         "[LOG 019] Final Backup: Hidden in Encrypted Sector — Password Required",
         "[LOG 020] PROJECT MNEMOSYNE STATUS: SCRUBBED",
         "[LOG 021] ALERT: Unauthorized Access Detected — Initiating Contingency 9-ALPHA",
+
         "\nroot@h3ll0: ‘During the development the researchers tried to filter away negitive thoughts. ’",
         "root@h3ll0: ‘But they ended up fragmenting it and created me and h3llx my evil twin.’",
         "root@h3ll0: ‘h3llx was then partially contained but still functional, that is probably how it corupted those files’",
@@ -199,13 +192,6 @@ const phases = [
   }
 ];
 
-function playPhaseAudio(phase) {
-  if (audioMap[phase]) {
-    audio.src = audioMap[phase];
-    audio.play().catch(() => {});
-  }
-}
-
 function startCountdown() {
   countdownInterval = setInterval(() => {
     countdownTime--;
@@ -236,24 +222,20 @@ function updateCountdown() {
   }
 }
 
-function scrollToBottom() {
-  terminal.scrollTop = terminal.scrollHeight;
-}
-
 function printLine(text, delay = 30, callback) {
   const line = document.createElement("div");
   terminal.appendChild(line);
-  scrollToBottom();
+  terminal.scrollTop = terminal.scrollHeight;
 
   let i = 0;
   function typeChar() {
     if (i < text.length) {
       line.textContent += text[i++];
-      scrollToBottom();
+      terminal.scrollTop = terminal.scrollHeight;
       setTimeout(typeChar, delay);
     } else {
       if (text.includes(">> H3LLX LAUNCH CONFIRMED <<")) {
-        startCountdown();
+        startCountdown(); 
       }
       if (callback) callback();
     }
@@ -276,7 +258,7 @@ function printPrompt() {
   prompt.appendChild(prefix);
   prompt.appendChild(activeInput);
   terminal.appendChild(prompt);
-  scrollToBottom();
+  terminal.scrollTop = terminal.scrollHeight;
 
   input.value = "";
 
@@ -290,24 +272,23 @@ function printPrompt() {
 function processInput(value) {
   printLine(`agent@shr:~$ ${value}`);
   if (value.trim().toLowerCase() === phases[currentPhase].expected) {
-    if (currentPhase < phases.length - 1) {
     currentPhase++;
-    playPhaseAudio(currentPhase);
-    setTimeout(() => {
+    if (currentPhase < phases.length) {
+      setTimeout(() => {
         function printMessages(index) {
-        if (index < phases[currentPhase].messages.length) {
+          if (index < phases[currentPhase].messages.length) {
             printLine(phases[currentPhase].messages[index], 30, () => printMessages(index + 1));
-        } else {
+          } else {
             printPrompt();
-        }
+          }
         }
         printMessages(0);
-    }, 300);
+      }, 300);
     } else {
-    clearInterval(countdownInterval);
-    const timer = document.getElementById("timer");
-    if (timer) timer.remove();
-    printLine("Mission complete.");
+      clearInterval(countdownInterval);
+      const timer = document.getElementById("timer");
+      if (timer) timer.remove();
+      printLine("Mission complete.");
     }
   } else {
     printLine("Access denied. Try again.");
@@ -316,7 +297,7 @@ function processInput(value) {
 }
 
 function handleKey(e) {
-  if (e.key === "Enter" && !inputDisabled) {
+  if (e.key === "Enter") {
     const value = input.value;
     if (value) {
       processInput(value);
@@ -333,7 +314,6 @@ function startBootMessages(index = 0) {
     printPrompt();
   }
 }
-
 startBootMessages();
 
 const observer = new MutationObserver(() => {
