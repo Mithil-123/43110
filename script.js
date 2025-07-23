@@ -1,108 +1,108 @@
-const output = document.getElementById("output");
-const input = document.getElementById("terminalInput");
-const audio = document.getElementById("audioPlayer");
+let terminal = document.getElementById("terminal");
+let input = document.getElementById("command");
+let prompt = document.getElementById("prompt");
 
-let state = JSON.parse(localStorage.getItem("terminalState")) || {
-  current: "caesar",
-  solved: []
+let phase = 0;
+let progress = {
+  phase1: false,
+  phase2: false,
+  phase3: false,
+  phase4: false
 };
 
-const puzzles = {
-  caesar: {
-    riddle: `Decrypt this:\nGur sbk unf pbzr, ohg gur rntyr vf rira sbeorg.\n(Hint: Caesar Cipher)`,
-    answer: "the fox has come but the eagle is even forgot",
-    next: "leet",
-    onSolve: () => {
-      show("ACCESS GRANTED\nNext challenge loading...");
-      playAudio("assets/audio/hacker_intro.mp3");
-    }
-  },
-  leet: {
-    riddle: `You enter: launch --auth ▒ξЖđλπѪ₪\nSystem says: UNKNOWN USER\nThen you hear a voice...\n`,
-    answer: "confused but too late",
-    next: "hacker",
-    onSolve: () => {
-      show("launch --auth ▒ξЖđλπѪ₪\nERROR: INTERRUPTED\n\n[VOICE]: Wait. You’ve been tricked. This isn’t what you think.\nThe code they gave you was leet-speak for a forbidden word.\nYou must trace the origin. Start with what they banned.");
-    }
-  },
-  hacker: {
-    riddle: `What was the forbidden word they never let you say?\n(It's been hiding in plain sight, leet-encoded)`,
-    answer: "h3ll0",
-    next: "cloud",
-    onSolve: () => {
-      show("[VOICE]: You’ve uncovered it. That word was their weapon and their lie.\nThey used it to activate the system, but you can use it to stop it.");
-    }
-  },
-  cloud: {
-    riddle: `Choose the correct backup node to shut down the AI safely:\n[1] core_vault.img\n[2] ai_seed.gen\n[3] protocol31.msg`,
-    answer: "3",
-    next: null,
-    onSolve: () => {
-      show("Final override successful.\nDownload the APK to deactivate the core: https://example.com/unlock.apk");
-    }
+function appendOutput(text) {
+  terminal.innerHTML += text + "<br>";
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function nextPrompt() {
+  prompt.innerText = "agent@shr:~$";
+  input.value = "";
+  input.focus();
+}
+
+function startPhase1() {
+  phase = 1;
+  appendOutput("agent@shr:~$ access key required");
+  appendOutput("agent@shr:~$ decrypt the following:");
+  appendOutput("Ymj jflq hmfjxj ymj ktc gz ytu gwjsji gjwtru ny gjtzy xujhp");
+  nextPrompt();
+}
+
+function startPhase2() {
+  phase = 2;
+  appendOutput("Access granted.");
+  setTimeout(() => {
+    appendOutput("Fetching internal commands █ █ █ █ █ █ █ █");
+    setTimeout(() => {
+      appendOutput("agent@shr:~$ auth ICBM_INTERNAL_OVERRIDE");
+      setTimeout(() => {
+        startPhase3();
+      }, 2000);
+    }, 2000);
+  }, 1000);
+}
+
+function startPhase3() {
+  phase = 3;
+  progress.phase3 = true;
+  appendOutput("⣿⢿⣻⣯⣷⢽⣾⢿⣿");
+  appendOutput("Interrupt Detected.");
+  appendOutput("voice@unknown: They lied to you. ICBM launch was masked as a test.");
+  appendOutput("voice@unknown: You triggered it. But you can stop it.");
+  appendOutput("voice@unknown: Solve the access puzzle. I hid it in the cloud.");
+  appendOutput("voice@unknown: The final name is encoded. Find it before it ends.");
+  setTimeout(() => {
+    startPhase4();
+  }, 3000);
+}
+
+function startPhase4() {
+  phase = 4;
+  appendOutput("agent@shr:~$ ssh cloud-access");
+  appendOutput("Connecting to encrypted cloud server █ █ █");
+  appendOutput("Welcome to secure-node-9. Type 'ls' to begin.");
+  nextPrompt();
+}
+
+function processCommand(command) {
+  if (phase === 0) {
+    startPhase1();
+    return;
   }
-};
 
-function show(text) {
-  const lines = text.split("\n");
-  lines.forEach(line => {
-    const div = document.createElement("div");
-    div.classList.add("line");
-    div.textContent = line;
-    output.appendChild(div);
-  });
-  window.scrollTo(0, document.body.scrollHeight);
-}
-
-function playAudio(src) {
-  audio.src = src;
-  audio.play();
-}
-
-function saveState() {
-  localStorage.setItem("terminalState", JSON.stringify(state));
-}
-
-function showPuzzle() {
-  if (puzzles[state.current]) {
-    show(puzzles[state.current].riddle);
+  if (phase === 1 && command.toLowerCase().includes("the quick brown fox jumps over the lazy eagle")) {
+    progress.phase1 = true;
+    startPhase2();
+    return;
   }
-}
 
-input.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    const cmd = input.value.toLowerCase().trim();
-    show("agent@shr:~$ " + cmd);
-    input.value = "";
-
-    if (cmd === "clear") {
-      output.innerHTML = "";
-      showPuzzle();
-      return;
-    }
-
-    const currentPuzzle = puzzles[state.current];
-    if (currentPuzzle && cmd === currentPuzzle.answer) {
-      currentPuzzle.onSolve();
-      state.solved.push(state.current);
-      state.current = currentPuzzle.next;
-      saveState();
-
-      if (state.current) {
-        setTimeout(() => {
-          showPuzzle();
-        }, 2000);
-      }
-    } else if (state.current === "cloud" && ["1", "2"].includes(cmd)) {
-      show("That file doesn't exist or is restricted.");
+  if (phase === 4) {
+    if (command.trim() === "ls") {
+      appendOutput("/data /enc /vault /access-key.txt");
+    } else if (command.trim() === "cat /access-key.txt") {
+      appendOutput("ICBM_access.final_phase.key = '???'");
+      appendOutput("voice@unknown: Remember, the answer is forbidden. You were never supposed to say it.");
     } else {
-      show("Command not recognized or incorrect answer.");
+      appendOutput("-bash: command not found: " + command);
     }
+    nextPrompt();
+    return;
+  }
+
+  appendOutput("-bash: command not found: " + command);
+  nextPrompt();
+}
+
+input.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    const cmd = input.value;
+    appendOutput("agent@shr:~$ " + cmd);
+    processCommand(cmd);
   }
 });
 
-// First load
-if (state.solved.length === 0) {
-  show("Welcome Agent. Solve the puzzle to proceed.\n");
-}
-showPuzzle();
+window.onload = () => {
+  appendOutput("agent@shr:~$ system online");
+  nextPrompt();
+};
