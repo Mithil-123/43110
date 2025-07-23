@@ -1,7 +1,7 @@
 // Terminal Puzzle Game script.js
 
 const terminal = document.getElementById("terminal");
-const input = document.getElementById("input");
+const input = document.getElementById("user-input");
 let currentPhase = 0;
 let history = [];
 let countdownTime = 5 * 60; // 5 minutes
