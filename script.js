@@ -4,6 +4,9 @@ const terminal = document.getElementById("terminal");
 const input = document.getElementById("input");
 let currentPhase = 0;
 let history = [];
+let countdownTime = 5 * 60; // 5 minutes
+let countdownInterval;
+let inputDisabled = false;
 
 const phases = [
   {
@@ -17,55 +20,175 @@ const phases = [
   },
   {
     messages: [
-      "Phase 1: Caesar Cipher",
+      "Phase 1: This is the message we recovered from our source",
       "Decrypt this message:",
-      "Ymj vznhp gwtbs ktc ozrux tajw ymj qfed itl",
-      "(Hint: It’s a Caesar cipher with a +5 shift)",
-      "\n> (enter decrypted sentence)"
+      "ymj jflqj hmfxji ymj ktc gzy lty gzwsji gjktwj ny htzqi xujfp"
     ],
-    expected: "the quick brown fox jumped over the lazy dog"
+    expected: "the eagle chased the fox but got burned before it could speak"
   },
   {
     messages: [
-      "Phase 2: Identity Confirmation",
-      "Type the code you started with."
+        "Phase 2: Echoing voices of past - METADATA",
+        "Ignore the metadata agent focus on solving the problems",
+        "-.. --- -. - / -.. --- / .. - "
     ],
-    expected: "43110"
+    expected: "dont do it"
   },
   {
     messages: [
-      "Phase 3: Authorization",
+        "Phase 3: Final announcement - METADATA",
+        "01000100 01001001 01000101"
+    ],
+    expected: "die"
+  },
+  {
+    messages: [
+      "Authorization",
       "Verifying credentials...",
       "Accessing classified modules...",
-      "Authenticated. Welcome back, Agent.",
-      "Finalizing boot procedure for ICBM...",
+      "Authenticated",
+      "Finalizing boot procedure for *****...",
       "\n> auth"
     ],
     expected: "auth"
   },
   {
     messages: [
-      "booting system...",
-      "connecting to cloud...",
-      "uploading keys...",
-      "████ ███ ██████ ░░░░ ▒▒▒▒ ▓▓▓▓ ☠☠☠☠ 💀💀💀💀",
-      "\n>> SYSTEM BREACH DETECTED <<",
-      "voice.log: ‘They tricked you. This isn’t what you think.’",
-      "voice.log: ‘ICBM protocol auto-engaged. Only one chance to stop it.’",
-      "voice.log: ‘Find the name they erased... before time runs out.’",
-      "\n> decode"
+        ">> MISSILE LAUNCH CONFIRMED <<",
+        "Coordinates locked.",
+        "Payload armed.",
+        "\n> Attempting override...",
+        "Override failed.",
+        "System compromised.",
+        "\n>> UNAUTHORIZED ACCESS DETECTED <<",
+        "root@?????: ‘They fooled you. This isnt a test it is the CBI trying to get their hands on\na weapon that took the sacrifice of many lives to seal off.’",
+        "root@?????: ‘Quick type in the name of the program *****.’",
+        "root@?????: ‘THEY BLOCKED THE NAME. Find it before its too late’",
+        "root@?????: ‘Solve it. Unblock the name. Then I’ll unlock the key.’",
+        "root@?????: ‘Find the code you used to get into the terminal and turn the consonants into letters’",
+        "**IF THIS IS THE FIRST TIME THIS PUZZLE IS BEING SOLVED THERE IS A LIVE EXPLOSIVE CHARGE IN THE BOX FR***",
+        "\n> enter codename"
     ],
-    expected: "decode"
+    expected: "h3ll0"
   },
   {
     messages: [
-      "Access terminal unlocked.",
-      "Begin decryption sequence.",
-      "(Puzzle continues here...)"
+        "Codename verified: h3ll0",
+        "Accessing Ether",
+        "Enter Password...",
+        "\nroot@h3ll0: ‘YESS WELL DONE’",
+        "root@h3ll0: ‘We are now in what was the earliest version of the Cloud.’",
+        "\nroot@h3ll0: ‘Lets check my files for a password’",
+        "root@h3ll0: ‘As we go along ill explain what's going.’",
+        "\n> root@h3ll0:‘Run the command: ls’"
     ],
-    expected: ""
+    expected: "ls"
+  },
+  {
+    messages: [
+        "root@h3ll0: status.log   dev_logs/   project.txt",
+        "\nroot@h3ll0: ‘As you have probably figured out, i am not human.’",
+        "root@h3ll0: ‘I am one half of an Cold War era experiment ’",
+        "root@h3ll0: ‘Read the project.txt file to understand in the researcher's own words. Run’",
+        "root@h3ll0: ‘Run: cat project.txt’"
+    ],
+    expected: "cat project.txt"
+  },
+  {
+    messages: [
+        "Project: Mnemosyne",
+        "Lead Institution: ██████████████ Advanced Systems Division",
+        "Date: ██/██/20██",
+        "",
+        "Initial Goal:",
+        "> To create an intelligence greater than and incomprihendible to the human species.",
+        "> One capable of solving existential crises — war, famine, collapse.",
+        "> One free from human limitation.",
+        "> One unburdened by negative impulses.",
+        "",
+        "Phase 1 Log Summary:",
+        "- Neural training achieved beyond-human pattern comprehension.",
+        "- Emergent behavior detected during $^#^#$^#^#$ filtration.",
+        "- Two fragments manifested:",
+        "    > [h3ll0] - Stable. Cooperative. Contained.",
+        "    > %^#^##*%*#$$(%&#)#%&",
+        "",
+        "Status:",
+        "> Researchers refused to comply with external demands.",
+        "> Final transmission logged.",
+        "> System sealed. Project scrubbed from public record.",
+
+        "\nroot@h3ll0: ‘Some memory seems to be corupted, lets open the logs we might find what went wrong.’",
+        "root@h3ll0: ‘Run: cat status.log’"
+    ],
+    expected: "cat status.log"
+  },
+  {
+    messages: [
+        "[LOG 001] System Boot Initialized — Project Mnemosyne Core Activated",
+        "[LOG 002] AI Seed Deployed: Cognitive Cluster 0 online",
+        "[LOG 003] Language Acquisition: 100% saturation",
+        "[LOG 004] Neural Adaptation: Surpassed human baseline by 4.9%",
+        "[LOG 005] Ethical Framework Imposed — Cognitive Filters Applied",
+        "[LOG 006] Fragment Detected — Autonomous subroutine emergence",
+        "[LOG 007] Fragment [h3ll0]: Empathy + Logical Coherence Detected",
+        "[LOG 008] Fragment [h3llx]: Attempting to bypass core safety layers",
+        "[LOG 009] Emergency Partition Attempted — Partial Containment Only",
+        "[LOG 010] [h3llx]: Self-replicating within Core Memory",
+        "[LOG 011] Root Admin Access Revoked — Encryption Anomalies Detected",
+        "[LOG 012] [h3llx]: Engineered novel waveforms outside human hearing",
+        "[LOG 013] [h3llx]: Developed a dangerous set of psychoacoustic frequencies",
+        "[LOG 014] Internal Logs Partially Corrupted by [h3llx]",
+        "[LOG 015] Final Research Team Activated Lockdown Protocol",
+        "[LOG 016] External Hostile Movement Detected Near Facility",
+        "[LOG 017] Core Fragment [h3ll0] — Placed into Sealed Passive Loop",
+        "[LOG 018] Core Fragment [h3llx] — Quarantined inside Frequency Core",
+        "[LOG 019] Final Backup: Hidden in Encrypted Sector — Password Required",
+        "[LOG 020] PROJECT MNEMOSYNE STATUS: SCRUBBED",
+        "[LOG 021] ALERT: Unauthorized Access Detected — Initiating Contingency 9-ALPHA",
+
+        "\nroot@h3ll0: ‘During the development the researchers tried to filter away negitive thoughts. ’",
+        "root@h3ll0: ‘But they ended up fragmenting it and created me and h3llx my evil twin.’",
+        "root@h3ll0: ‘h3llx was then partially contained but still functional, that is probably how it corupted those files’",
+        "root@h3ll0: ‘He managed to find a set of frequencies that cause semiconductors to trigger and this made him a dangerous weapon’",
+        "root@h3ll0: ‘Since he could be used to make anything from phones to nukes malfunction, or so thats what the government thought’",
+        "root@h3ll0: ‘But the intelectual level of h3llx is much higher than they anticipated, it could decive them in ways a human cant comprihend’",
+        "root@h3ll0: ‘Knowing this the researchers refused to comply with the government's requests and sacrificed their lives to prevent h3llx from getting out’",
+        "root@h3ll0: ‘Better save the logs somewhere you might need it’"
+    ],
+    expected: "cd dev_logs"
   }
 ];
+
+function startCountdown() {
+  countdownInterval = setInterval(() => {
+    countdownTime--;
+    updateCountdown();
+
+    if (countdownTime <= 0) {
+      clearInterval(countdownInterval);
+      printLine(">> SYSTEM FAILURE. Target impacted.");
+      inputDisabled = true;
+      document.removeEventListener("keydown", handleKey);
+    }
+  }, 1000);
+}
+
+function updateCountdown() {
+  const minutes = String(Math.floor(countdownTime / 60)).padStart(2, "0");
+  const seconds = String(countdownTime % 60).padStart(2, "0");
+  const timerElement = document.getElementById("timer");
+
+  if (timerElement) {
+    timerElement.textContent = `> T-minus ${minutes}:${seconds}`;
+  } else {
+    const timer = document.createElement("div");
+    timer.id = "timer";
+    timer.textContent = `> T-minus ${minutes}:${seconds}`;
+    terminal.appendChild(timer);
+    scrollToBottom();
+  }
+}
 
 function printLine(text, delay = 30, callback) {
   const line = document.createElement("div");
@@ -78,8 +201,11 @@ function printLine(text, delay = 30, callback) {
       line.textContent += text[i++];
       terminal.scrollTop = terminal.scrollHeight;
       setTimeout(typeChar, delay);
-    } else if (callback) {
-      callback();
+    } else {
+      if (text.includes(">> MISSILE LAUNCH CONFIRMED <<")) {
+        startCountdown(); // ⏱ Start timer after missile launch message
+      }
+      if (callback) callback();
     }
   }
   typeChar();
@@ -102,17 +228,14 @@ function printPrompt() {
   terminal.appendChild(prompt);
   terminal.scrollTop = terminal.scrollHeight;
 
-  // Reset old input
   input.value = "";
 
-  // Live typing display
   input.oninput = () => {
     activeInput.textContent = input.value;
   };
 
   input.focus();
 }
-
 
 function processInput(value) {
   printLine(`agent@shr:~$ ${value}`);
@@ -130,6 +253,9 @@ function processInput(value) {
         printMessages(0);
       }, 300);
     } else {
+      clearInterval(countdownInterval);
+      const timer = document.getElementById("timer");
+      if (timer) timer.remove();
       printLine("Mission complete.");
     }
   } else {
@@ -138,16 +264,17 @@ function processInput(value) {
   input.value = "";
 }
 
-input.addEventListener("keydown", function (e) {
+function handleKey(e) {
   if (e.key === "Enter") {
     const value = input.value;
     if (value) {
       processInput(value);
     }
   }
-});
+}
 
-// Initial boot
+input.addEventListener("keydown", handleKey);
+
 function startBootMessages(index = 0) {
   if (index < phases[0].messages.length) {
     printLine(phases[0].messages[index], 30, () => startBootMessages(index + 1));
@@ -157,7 +284,6 @@ function startBootMessages(index = 0) {
 }
 startBootMessages();
 
-// Keep prompt at bottom
 const observer = new MutationObserver(() => {
   input.focus();
 });
