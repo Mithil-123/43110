@@ -68,11 +68,22 @@ const phases = [
   }
 ];
 
-function printLine(text) {
+function printLine(text, delay = 30, callback) {
   const line = document.createElement("div");
-  line.textContent = text;
   terminal.appendChild(line);
   terminal.scrollTop = terminal.scrollHeight;
+
+  let i = 0;
+  function typeChar() {
+    if (i < text.length) {
+      line.textContent += text[i++];
+      terminal.scrollTop = terminal.scrollHeight;
+      setTimeout(typeChar, delay);
+    } else if (callback) {
+      callback();
+    }
+  }
+  typeChar();
 }
 
 function printPrompt() {
@@ -89,9 +100,14 @@ function processInput(value) {
     currentPhase++;
     if (currentPhase < phases.length) {
       setTimeout(() => {
-        phases[currentPhase].messages.forEach((m, i) => {
-          setTimeout(() => printLine(m), i * 500);
-        });
+        function printMessages(index) {
+          if (index < phases[currentPhase].messages.length) {
+            printLine(phases[currentPhase].messages[index], 30, () => printMessages(index + 1));
+          } else {
+            printPrompt();
+          }
+        }
+        printMessages(0);
       }, 300);
     } else {
       printLine("Mission complete.");
@@ -112,9 +128,14 @@ input.addEventListener("keydown", function (e) {
 });
 
 // Initial boot
-phases[0].messages.forEach((line, i) => {
-  setTimeout(() => printLine(line), i * 400);
-});
+function startBootMessages(index = 0) {
+  if (index < phases[0].messages.length) {
+    printLine(phases[0].messages[index], 30, () => startBootMessages(index + 1));
+  } else {
+    printPrompt();
+  }
+}
+startBootMessages();
 
 // Keep prompt at bottom
 const observer = new MutationObserver(() => {
