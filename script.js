@@ -290,24 +290,24 @@ function printPrompt() {
 function processInput(value) {
   printLine(`agent@shr:~$ ${value}`);
   if (value.trim().toLowerCase() === phases[currentPhase].expected) {
+    if (currentPhase < phases.length - 1) {
     currentPhase++;
-    if (currentPhase < phases.length) {
-      playPhaseAudio(currentPhase);
-      setTimeout(() => {
+    playPhaseAudio(currentPhase);
+    setTimeout(() => {
         function printMessages(index) {
-          if (index < phases[currentPhase].messages.length) {
+        if (index < phases[currentPhase].messages.length) {
             printLine(phases[currentPhase].messages[index], 30, () => printMessages(index + 1));
-          } else {
+        } else {
             printPrompt();
-          }
+        }
         }
         printMessages(0);
-      }, 300);
+    }, 300);
     } else {
-      clearInterval(countdownInterval);
-      const timer = document.getElementById("timer");
-      if (timer) timer.remove();
-      printLine("Mission complete.");
+    clearInterval(countdownInterval);
+    const timer = document.getElementById("timer");
+    if (timer) timer.remove();
+    printLine("Mission complete.");
     }
   } else {
     printLine("Access denied. Try again.");
