@@ -1,116 +1,123 @@
-let terminal = document.getElementById("terminal");
-let input = document.getElementById("command");
-let prompt = document.getElementById("prompt");
+// Terminal Puzzle Game script.js
 
-let phase = 0;
-let progress = {
-  phase1: false,
-  phase2: false,
-  phase3: false,
-  phase4: false
-};
+const terminal = document.getElementById("terminal");
+const inputContainer = document.getElementById("input-container");
+const input = document.getElementById("input");
+let currentPhase = 0;
+let history = [];
 
-function appendOutput(text) {
-  terminal.innerHTML += text + "<br>";
+const phases = [
+  {
+    messages: [
+      "Welcome, Agent.",
+      "You’ve arrived at the secure terminal.",
+      "Enter the following command to begin your mission:",
+      "\n> initiate"
+    ],
+    expected: "initiate"
+  },
+  {
+    messages: [
+      "Phase 1: Caesar Cipher",
+      "Decrypt this message:",
+      "Ymj jflq hmfjxj ymj ktc gz ytu gwjsji gjwtru ny gjtzy xujhp",
+      "(Hint: It’s a Caesar cipher with a backward shift)",
+      "\n> (enter decrypted sentence)"
+    ],
+    expected: "the eagle chased the fox but got burned before it could speak"
+  },
+  {
+    messages: [
+      "Phase 2: Identity Confirmation",
+      "Type the code you started with."
+    ],
+    expected: "43110"
+  },
+  {
+    messages: [
+      "Phase 3: Authorization",
+      "Verifying credentials...",
+      "Accessing classified modules...",
+      "Authenticated. Welcome back, Agent.",
+      "Finalizing boot procedure for ICBM...",
+      "\n> auth"
+    ],
+    expected: "auth"
+  },
+  {
+    messages: [
+      "booting system...",
+      "connecting to cloud...",
+      "uploading keys...",
+      "████ ███ ██████ ░░░░ ▒▒▒▒ ▓▓▓▓ ☠☠☠☠ 💀💀💀💀",
+      "\n>> SYSTEM BREACH DETECTED <<",
+      "voice.log: ‘They tricked you. This isn’t what you think.’",
+      "voice.log: ‘ICBM protocol auto-engaged. Only one chance to stop it.’",
+      "voice.log: ‘Find the name they erased... before time runs out.’",
+      "\n> decode"
+    ],
+    expected: "decode"
+  },
+  {
+    messages: [
+      "Access terminal unlocked.",
+      "Begin decryption sequence.",
+      "(Puzzle continues here...)"
+    ],
+    expected: ""
+  }
+];
+
+function printLine(text) {
+  const line = document.createElement("div");
+  line.textContent = text;
+  terminal.appendChild(line);
   terminal.scrollTop = terminal.scrollHeight;
 }
 
-function nextPrompt() {
-  prompt.innerText = "agent@shr:~$";
-  input.value = "";
-  input.focus();
+function printPrompt() {
+  const prompt = document.createElement("div");
+  prompt.className = "prompt-line";
+  prompt.innerHTML = `<span class='green'>agent@shr</span>:~$ <span id='active-input'></span>`;
+  terminal.appendChild(prompt);
+  terminal.scrollTop = terminal.scrollHeight;
 }
 
-function startPhase1() {
-  phase = 1;
-  appendOutput("agent@shr:~$ access key required");
-  appendOutput("agent@shr:~$ decrypt the following:");
-  appendOutput("Ymj jflq hmfjxj ymj ktc gz ytu gwjsji gjwtru ny gjtzy xujhp");
-  nextPrompt();
-}
-
-function startPhase2() {
-  phase = 2;
-  appendOutput("auth accepted...");
-  appendOutput("executing launch command...");
-  setTimeout(() => {
-    appendOutput("launch authorized.");
-    setTimeout(() => {
-      appendOutput("uploading payload: ICBM...");
+function processInput(value) {
+  printLine(`agent@shr:~$ ${value}`);
+  if (value.trim().toLowerCase() === phases[currentPhase].expected) {
+    currentPhase++;
+    if (currentPhase < phases.length) {
       setTimeout(() => {
-        appendOutput("error: unknown anomaly in uplink.");
-        appendOutput("intercepted by unidentified entity...");
-        setTimeout(() => {
-          appendOutput("WARNING: You have been tricked. This is not a simulation.");
-          appendOutput("You must stop the ICBM.");
-          appendOutput("agent@shr:~$ solve this: 43110 was their codename. What is its true name?");
-          nextPrompt();
-        }, 3000);
-      }, 1500);
-    }, 1500);
-  }, 1000);
-}
-
-function startPhase3() {
-  phase = 3;
-  appendOutput("Correct. Identity partially recovered.");
-  appendOutput("Final key required. Decoding will begin.");
-  appendOutput("agent@shr:~$ override required. Submit counter-command:");
-  nextPrompt();
-}
-
-function startPhase4() {
-  phase = 4;
-  appendOutput("Counter-command accepted.");
-  appendOutput("ICBM shutdown initiated...");
-  appendOutput("System: box unlocked. Retrieve contents.");
-  nextPrompt();
+        phases[currentPhase].messages.forEach((m, i) => {
+          setTimeout(() => printLine(m), i * 500);
+        });
+      }, 300);
+    } else {
+      printLine("Mission complete.");
+    }
+  } else {
+    printLine("Access denied. Try again.");
+  }
+  input.value = "";
 }
 
 input.addEventListener("keydown", function (e) {
   if (e.key === "Enter") {
-    let command = input.value.trim();
-    appendOutput("agent@shr:~$ " + command);
-
-    if (phase === 1) {
-      if (command.toLowerCase() === "the quick brown fox jumps over the lazy eagle") {
-        progress.phase1 = true;
-        startPhase2();
-      } else {
-        appendOutput("access denied. try again.");
-        nextPrompt();
-      }
-    }
-
-    else if (phase === 3) {
-      if (command.toLowerCase().includes("auth") || command.toLowerCase().includes("override")) {
-        progress.phase3 = true;
-        startPhase4();
-      } else {
-        appendOutput("invalid counter-command.");
-        nextPrompt();
-      }
-    }
-
-    else if (phase === 2) {
-      if (command === "43110") {
-        startPhase3();
-      } else {
-        appendOutput("incorrect. hint: leetspeak.");
-        nextPrompt();
-      }
-    }
-
-    else {
-      appendOutput("unknown command.");
-      nextPrompt();
+    const value = input.value;
+    if (value) {
+      processInput(value);
     }
   }
 });
 
-window.onload = () => {
-  appendOutput("agent@shr:~$ system online");
-  setTimeout(() => {
-    startPhase1();
-  }, 1000);
-};
+// Initial boot
+phases[0].messages.forEach((line, i) => {
+  setTimeout(() => printLine(line), i * 400);
+});
+
+// Keep prompt at bottom
+const observer = new MutationObserver(() => {
+  input.focus();
+});
+observer.observe(terminal, { childList: true });
