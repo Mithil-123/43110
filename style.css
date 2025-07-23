@@ -8,6 +8,8 @@ body {
 
 #terminal {
   white-space: pre-wrap;
+  padding-bottom: 2rem;
+  min-height: 80vh;
 }
 
 #input-line {
