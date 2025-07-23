@@ -13,6 +13,7 @@ const phases = [
     messages: [
       "Welcome, Agent.",
       "You’ve arrived at the secure terminal.",
+      "Do not click on the application as it will suspend operation to prevent copying",
       "Enter the following command to begin your mission:",
       "\n> initiate"
     ],
@@ -20,7 +21,7 @@ const phases = [
   },
   {
     messages: [
-      "Phase 1: This is the message we recovered from our source",
+      "\nPhase 1: This is the message we recovered from our source",
       "Decrypt this message:",
       "ymj jflqj hmfxji ymj ktc gzy lty gzwsji gjktwj ny htzqi xujfp"
     ],
@@ -28,7 +29,7 @@ const phases = [
   },
   {
     messages: [
-        "Phase 2: Echoing voices of past - METADATA",
+        "\nPhase 2: Echoing voices of past - METADATA",
         "Ignore the metadata agent focus on solving the problems",
         "-.. --- -. - / -.. --- / .. - "
     ],
@@ -36,32 +37,32 @@ const phases = [
   },
   {
     messages: [
-        "Phase 3: Final announcement - METADATA",
+        "\nPhase 3: Final announcement - METADATA",
         "01000100 01001001 01000101"
     ],
     expected: "die"
   },
   {
     messages: [
-      "Authorization",
+      "\nAuthorization",
       "Verifying credentials...",
       "Accessing classified modules...",
       "Authenticated",
       "Finalizing boot procedure for *****...",
-      "\n> auth"
+      "\n> Run: auth"
     ],
     expected: "auth"
   },
   {
     messages: [
-        ">> MISSILE LAUNCH CONFIRMED <<",
+        "\n>> H3LLX LAUNCH CONFIRMED <<",
         "Coordinates locked.",
         "Payload armed.",
         "\n> Attempting override...",
         "Override failed.",
         "System compromised.",
         "\n>> UNAUTHORIZED ACCESS DETECTED <<",
-        "root@?????: ‘They fooled you. This isnt a test it is the CBI trying to get their hands on\na weapon that took the sacrifice of many lives to seal off.’",
+        "root@?????: ‘They fooled you. This isnt a test it is the Govt trying to get their hands on a weapon that took the sacrifice of many lives to seal.’",
         "root@?????: ‘Quick type in the name of the program *****.’",
         "root@?????: ‘THEY BLOCKED THE NAME. Find it before its too late’",
         "root@?????: ‘Solve it. Unblock the name. Then I’ll unlock the key.’",
@@ -73,7 +74,7 @@ const phases = [
   },
   {
     messages: [
-        "Codename verified: h3ll0",
+        "\nCodename verified: h3ll0",
         "Accessing Ether",
         "Enter Password...",
         "\nroot@h3ll0: ‘YESS WELL DONE’",
@@ -86,7 +87,7 @@ const phases = [
   },
   {
     messages: [
-        "root@h3ll0: status.log   dev_logs/   project.txt",
+        "\nroot@h3ll0: status.log   dev_vlogs/   project.txt",
         "\nroot@h3ll0: ‘As you have probably figured out, i am not human.’",
         "root@h3ll0: ‘I am one half of an Cold War era experiment ’",
         "root@h3ll0: ‘Read the project.txt file to understand in the researcher's own words. Run’",
@@ -96,9 +97,12 @@ const phases = [
   },
   {
     messages: [
-        "Project: Mnemosyne",
+        "\nProject: Mnemosyne",
         "Lead Institution: ██████████████ Advanced Systems Division",
         "Date: ██/██/20██",
+        "",
+        "Funding:",
+        "> A joint US-Soviet partnership among small bodies in hopes of calming the cold war tensions",
         "",
         "Initial Goal:",
         "> To create an intelligence greater than and incomprihendible to the human species.",
@@ -125,7 +129,7 @@ const phases = [
   },
   {
     messages: [
-        "[LOG 001] System Boot Initialized — Project Mnemosyne Core Activated",
+        "\n[LOG 001] System Boot Initialized — Project Mnemosyne Core Activated",
         "[LOG 002] AI Seed Deployed: Cognitive Cluster 0 online",
         "[LOG 003] Language Acquisition: 100% saturation",
         "[LOG 004] Neural Adaptation: Surpassed human baseline by 4.9%",
@@ -154,9 +158,37 @@ const phases = [
         "root@h3ll0: ‘Since he could be used to make anything from phones to nukes malfunction, or so thats what the government thought’",
         "root@h3ll0: ‘But the intelectual level of h3llx is much higher than they anticipated, it could decive them in ways a human cant comprihend’",
         "root@h3ll0: ‘Knowing this the researchers refused to comply with the government's requests and sacrificed their lives to prevent h3llx from getting out’",
-        "root@h3ll0: ‘Better save the logs somewhere you might need it’"
+        "root@h3ll0: ‘Better save the logs somewhere you might need it’",
+        "root@h3ll0: ‘For now lets check the dev_vlogs Run: cd dev_vlogs’"
     ],
-    expected: "cd dev_logs"
+    expected: "cd dev_vlogs"
+  },
+  {
+    messages:[
+        "\nroot@h3ll0: ‘Lets see what files are in this folder’",
+        "root@h3ll0: ‘Run : ls’"
+    ],
+    expected: "ls"
+  },
+  {
+    messages:[
+        "\nfinal_call.mp3",
+        "\nroot@h3ll0: ‘Thats a rather strange name’",
+        "root@h3ll0: ‘Run: mpv final_call.mp3’",
+    ],
+    expected: "mpv final_call.mp3"
+  },
+  {
+    messages:[
+        "\nroot@h3ll0: ‘I was not trained to analyse audio so you need to figure out the password by yourself.’",
+        "root@h3ll0: ‘If its any help the password is in the form of aa-00 and was created on the last day of operation’"
+    ],
+    expected: "su-75"
+  },
+  {
+    messages:[
+        "\nroot@h3ll0: ‘YOU DID IT HERE IS THE LINK FOR THE KILL SWITCH’"
+    ]
   }
 ];
 
@@ -202,7 +234,7 @@ function printLine(text, delay = 30, callback) {
       terminal.scrollTop = terminal.scrollHeight;
       setTimeout(typeChar, delay);
     } else {
-      if (text.includes(">> MISSILE LAUNCH CONFIRMED <<")) {
+      if (text.includes(">> H3LLX LAUNCH CONFIRMED <<")) {
         startCountdown(); // ⏱ Start timer after missile launch message
       }
       if (callback) callback();
