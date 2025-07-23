@@ -31,78 +31,86 @@ function startPhase1() {
 
 function startPhase2() {
   phase = 2;
-  appendOutput("Access granted.");
+  appendOutput("auth accepted...");
+  appendOutput("executing launch command...");
   setTimeout(() => {
-    appendOutput("Fetching internal commands █ █ █ █ █ █ █ █");
+    appendOutput("launch authorized.");
     setTimeout(() => {
-      appendOutput("agent@shr:~$ auth ICBM_INTERNAL_OVERRIDE");
+      appendOutput("uploading payload: ICBM...");
       setTimeout(() => {
-        startPhase3();
-      }, 2000);
-    }, 2000);
+        appendOutput("error: unknown anomaly in uplink.");
+        appendOutput("intercepted by unidentified entity...");
+        setTimeout(() => {
+          appendOutput("WARNING: You have been tricked. This is not a simulation.");
+          appendOutput("You must stop the ICBM.");
+          appendOutput("agent@shr:~$ solve this: 43110 was their codename. What is its true name?");
+          nextPrompt();
+        }, 3000);
+      }, 1500);
+    }, 1500);
   }, 1000);
 }
 
 function startPhase3() {
   phase = 3;
-  progress.phase3 = true;
-  appendOutput("⣿⢿⣻⣯⣷⢽⣾⢿⣿");
-  appendOutput("Interrupt Detected.");
-  appendOutput("voice@unknown: They lied to you. ICBM launch was masked as a test.");
-  appendOutput("voice@unknown: You triggered it. But you can stop it.");
-  appendOutput("voice@unknown: Solve the access puzzle. I hid it in the cloud.");
-  appendOutput("voice@unknown: The final name is encoded. Find it before it ends.");
-  setTimeout(() => {
-    startPhase4();
-  }, 3000);
+  appendOutput("Correct. Identity partially recovered.");
+  appendOutput("Final key required. Decoding will begin.");
+  appendOutput("agent@shr:~$ override required. Submit counter-command:");
+  nextPrompt();
 }
 
 function startPhase4() {
   phase = 4;
-  appendOutput("agent@shr:~$ ssh cloud-access");
-  appendOutput("Connecting to encrypted cloud server █ █ █");
-  appendOutput("Welcome to secure-node-9. Type 'ls' to begin.");
+  appendOutput("Counter-command accepted.");
+  appendOutput("ICBM shutdown initiated...");
+  appendOutput("System: box unlocked. Retrieve contents.");
   nextPrompt();
 }
 
-function processCommand(command) {
-  if (phase === 0) {
-    startPhase1();
-    return;
-  }
+input.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    let command = input.value.trim();
+    appendOutput("agent@shr:~$ " + command);
 
-  if (phase === 1 && command.toLowerCase().includes("the quick brown fox jumps over the lazy eagle")) {
-    progress.phase1 = true;
-    startPhase2();
-    return;
-  }
-
-  if (phase === 4) {
-    if (command.trim() === "ls") {
-      appendOutput("/data /enc /vault /access-key.txt");
-    } else if (command.trim() === "cat /access-key.txt") {
-      appendOutput("ICBM_access.final_phase.key = '???'");
-      appendOutput("voice@unknown: Remember, the answer is forbidden. You were never supposed to say it.");
-    } else {
-      appendOutput("-bash: command not found: " + command);
+    if (phase === 1) {
+      if (command.toLowerCase() === "the quick brown fox jumps over the lazy eagle") {
+        progress.phase1 = true;
+        startPhase2();
+      } else {
+        appendOutput("access denied. try again.");
+        nextPrompt();
+      }
     }
-    nextPrompt();
-    return;
-  }
 
-  appendOutput("-bash: command not found: " + command);
-  nextPrompt();
-}
+    else if (phase === 3) {
+      if (command.toLowerCase().includes("auth") || command.toLowerCase().includes("override")) {
+        progress.phase3 = true;
+        startPhase4();
+      } else {
+        appendOutput("invalid counter-command.");
+        nextPrompt();
+      }
+    }
 
-input.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
-    const cmd = input.value;
-    appendOutput("agent@shr:~$ " + cmd);
-    processCommand(cmd);
+    else if (phase === 2) {
+      if (command === "43110") {
+        startPhase3();
+      } else {
+        appendOutput("incorrect. hint: leetspeak.");
+        nextPrompt();
+      }
+    }
+
+    else {
+      appendOutput("unknown command.");
+      nextPrompt();
+    }
   }
 });
 
 window.onload = () => {
   appendOutput("agent@shr:~$ system online");
-  nextPrompt();
+  setTimeout(() => {
+    startPhase1();
+  }, 1000);
 };
