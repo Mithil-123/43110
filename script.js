@@ -58,7 +58,7 @@ function playAudio(src) {
 input.addEventListener("keydown", e => {
   if (e.key === "Enter") {
     const cmd = input.value.toLowerCase().trim();
-    show("agent@h3ll0:~$ " + cmd);
+    show("agent@shr:~$ " + cmd);
     input.value = "";
 
     if (cmd === "clear") {
