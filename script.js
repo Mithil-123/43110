@@ -88,10 +88,31 @@ function printLine(text, delay = 30, callback) {
 function printPrompt() {
   const prompt = document.createElement("div");
   prompt.className = "prompt-line";
-  prompt.innerHTML = `<span class='green'>agent@shr</span>:~$ <span id='active-input'></span>`;
+
+  const prefix = document.createElement("span");
+  prefix.className = "green";
+  prefix.textContent = "agent@shr:~$ ";
+
+  const activeInput = document.createElement("span");
+  activeInput.id = "active-input";
+  activeInput.textContent = "";
+
+  prompt.appendChild(prefix);
+  prompt.appendChild(activeInput);
   terminal.appendChild(prompt);
   terminal.scrollTop = terminal.scrollHeight;
+
+  // Reset old input
+  input.value = "";
+
+  // Live typing display
+  input.oninput = () => {
+    activeInput.textContent = input.value;
+  };
+
+  input.focus();
 }
+
 
 function processInput(value) {
   printLine(`agent@shr:~$ ${value}`);
