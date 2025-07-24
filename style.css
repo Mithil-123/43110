@@ -1,47 +1,70 @@
 body {
-  background: black;
+  background-color: black;
   color: #00ff00;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: monospace;
   margin: 0;
-  padding: 1rem;
+  padding: 0;
+  overflow: hidden;
 }
 
 #terminal {
-  white-space: pre-wrap;
-  padding-bottom: 2rem;
-  min-height: 80vh;
+  padding: 20px;
+  height: 100vh;
+  overflow-y: auto;body {
+  margin: 0;
+  background: #000;
+  color: #00ff00;
+  font-family: monospace;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-#input-line {
+#terminal {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  scrollbar-width: thin;
+  scrollbar-color: #00ff00 #000;
+}
+
+#input {
+  background: black;
+  color: #00ff00;
+  border: none;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+}
+
+.prompt-line {
+  display: flex;
+}
+
+.prompt-line .green {
+  color: #00ff00;
+  margin-right: 5px;
+}
+
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+.prompt-line {
   display: flex;
   align-items: center;
-  margin-top: 1rem;
 }
 
-.prompt {
-  margin-right: 0.5rem;
-}
-
-#user-input {
-  background: black;
-  border: none;
+.green {
   color: #00ff00;
-  font-family: 'Courier New', Courier, monospace;
-  outline: none;
-  width: 100%;
 }
 
-.blink {
-  animation: blink 1s steps(2, start) infinite;
-}
-
-@keyframes blink {
-  to {
-    visibility: hidden;
-  }
-}
-
-#qr-container {
-  margin-top: 2rem;
-  text-align: center;
+#input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
