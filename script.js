@@ -1,7 +1,7 @@
 // Terminal Puzzle Game script.js
 
 const terminal = document.getElementById("terminal");
-const input = document.getElementById("user-input");
+const input = document.getElementById("input");
 let currentPhase = 0;
 let history = [];
 let countdownTime = 5 * 60; // 5 minutes
@@ -234,8 +234,8 @@ function printLine(text, delay = 30, callback) {
       terminal.scrollTop = terminal.scrollHeight;
       setTimeout(typeChar, delay);
     } else {
-      if (text.includes(">> H3LLX LAUNCH CONFIRMED <<")) {
-        startCountdown(); 
+      if (text.includes(">> MISSILE LAUNCH CONFIRMED <<")) {
+        startCountdown(); // ⏱ Start timer after missile launch message
       }
       if (callback) callback();
     }
