@@ -158,37 +158,17 @@ const phases = [
         "root@h3ll0: ‘Since he could be used to make anything from phones to nukes malfunction, or so thats what the government thought’",
         "root@h3ll0: ‘But the intelectual level of h3llx is much higher than they anticipated, it could decive them in ways a human cant comprihend’",
         "root@h3ll0: ‘Knowing this the researchers refused to comply with the government's requests and sacrificed their lives to prevent h3llx from getting out’",
-        "root@h3ll0: ‘Better save the logs somewhere you might need it’",
-        "root@h3ll0: ‘For now lets check the dev_vlogs Run: cd dev_vlogs’"
+        "root@h3ll0: ‘Im sure they hid the password here try to find it’",
+        "root@h3ll0: ‘I am seeing that its in the format of 00’"
     ],
-    expected: "cd dev_vlogs"
+    expected: "75"
   },
   {
     messages:[
-        "\nroot@h3ll0: ‘Lets see what files are in this folder’",
-        "root@h3ll0: ‘Run : ls’"
+        "\nroot@h3ll0: ‘GREAT JOB NOW DIFFUSE THE BOMB’",
+        "SYSTEM --- DEACTIVATION CODE : 1087’"
     ],
     expected: "ls"
-  },
-  {
-    messages:[
-        "\nfinal_call.mp3",
-        "\nroot@h3ll0: ‘Thats a rather strange name’",
-        "root@h3ll0: ‘Run: mpv final_call.mp3’",
-    ],
-    expected: "mpv final_call.mp3"
-  },
-  {
-    messages:[
-        "\nroot@h3ll0: ‘I was not trained to analyse audio so you need to figure out the password by yourself.’",
-        "root@h3ll0: ‘If its any help the password is in the form of aa-00 and was created on the last day of operation’"
-    ],
-    expected: "su-75"
-  },
-  {
-    messages:[
-        "\nroot@h3ll0: ‘YOU DID IT HERE IS THE LINK FOR THE KILL SWITCH’"
-    ]
   }
 ];
 
