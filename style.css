@@ -10,61 +10,27 @@ body {
 #terminal {
   padding: 20px;
   height: 100vh;
-  overflow-y: auto;body {
-  margin: 0;
-  background: #000;
-  color: #00ff00;
-  font-family: monospace;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-#terminal {
-  flex: 1;
-  padding: 10px;
   overflow-y: auto;
   white-space: pre-wrap;
+  box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: #00ff00 #000;
 }
 
-#input {
-  background: black;
+#countdown {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  font-size: 1.5rem;
+  font-weight: bold;
   color: #00ff00;
-  border: none;
-  padding: 10px;
-  font-family: monospace;
-  font-size: 1rem;
-  width: 100%;
-  outline: none;
+  display: none;
 }
 
-.prompt-line {
-  display: flex;
+.cursor {
+  animation: blink 1s step-start infinite;
 }
 
-.prompt-line .green {
-  color: #00ff00;
-  margin-right: 5px;
-}
-
-  white-space: pre-wrap;
-  box-sizing: border-box;
-}
-
-.prompt-line {
-  display: flex;
-  align-items: center;
-}
-
-.green {
-  color: #00ff00;
-}
-
-#input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+@keyframes blink {
+  50% { opacity: 0; }
 }

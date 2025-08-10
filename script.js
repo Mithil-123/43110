@@ -1,13 +1,3 @@
-// Terminal Puzzle Game script.js
-
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("input");
-let currentPhase = 0;
-let history = [];
-let countdownTime = 5 * 60; // 5 minutes
-let countdownInterval;
-let inputDisabled = false;
-
 const phases = [
   {
     messages: [
@@ -173,132 +163,121 @@ const phases = [
   }
 ];
 
-function startCountdown() {
-  countdownInterval = setInterval(() => {
-    countdownTime--;
-    updateCountdown();
+let currentPhase = 0;
+let terminalDiv, countdownDiv;
+let inputBuffer = "";
+let promptLine;
+let timer = null;
+let timeLeft = 900;
 
-    if (countdownTime <= 0) {
-      clearInterval(countdownInterval);
-      printLine(">> SYSTEM FAILURE. Target impacted.");
-      inputDisabled = true;
-      document.removeEventListener("keydown", handleKey);
+document.addEventListener("DOMContentLoaded", init);
+
+function typeLine(text, delay = 30) {
+    return new Promise(resolve => {
+        let i = 0;
+        let line = document.createElement("div");
+        terminalDiv.appendChild(line);
+        let interval = setInterval(() => {
+            line.textContent += text[i];
+            terminalDiv.scrollTop = terminalDiv.scrollHeight;
+            i++;
+            if (i >= text.length) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, delay);
+    });
+}
+
+async function printMessages(messages) {
+    for (let msg of messages) {
+        await typeLine(msg);
     }
-  }, 1000);
+    addPrompt();
+}
+
+function addPrompt() {
+    promptLine = document.createElement("div");
+    promptLine.innerHTML = `<span class="green">agent@shr :</span> <span id="typed"></span><span class="cursor">█</span>`;
+    terminalDiv.appendChild(promptLine);
+    terminalDiv.scrollTop = terminalDiv.scrollHeight;
+}
+
+function updatePrompt() {
+    const typedSpan = promptLine.querySelector("#typed");
+    typedSpan.textContent = inputBuffer;
+    terminalDiv.scrollTop = terminalDiv.scrollHeight;
+}
+
+function startCountdown() {
+    countdownDiv.style.display = "block";
+    updateCountdown();
+    timer = setInterval(() => {
+        timeLeft--;
+        updateCountdown();
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            countdownDiv.classList.remove("blink");
+            countdownDiv.innerHTML = "00:00 — Impact!";
+            countdownDiv.style.color = "#f00";
+        }
+    }, 1000);
 }
 
 function updateCountdown() {
-  const minutes = String(Math.floor(countdownTime / 60)).padStart(2, "0");
-  const seconds = String(countdownTime % 60).padStart(2, "0");
-  const timerElement = document.getElementById("timer");
+    let mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+    let secs = String(timeLeft % 60).padStart(2, '0');
+    countdownDiv.innerHTML = `${mins}:${secs}`;
 
-  if (timerElement) {
-    timerElement.textContent = `> T-minus ${minutes}:${seconds}`;
-  } else {
-    const timer = document.createElement("div");
-    timer.id = "timer";
-    timer.textContent = `> T-minus ${minutes}:${seconds}`;
-    terminal.appendChild(timer);
-    scrollToBottom();
-  }
-}
-
-function printLine(text, delay = 30, callback) {
-  const line = document.createElement("div");
-  terminal.appendChild(line);
-  terminal.scrollTop = terminal.scrollHeight;
-
-  let i = 0;
-  function typeChar() {
-    if (i < text.length) {
-      line.textContent += text[i++];
-      terminal.scrollTop = terminal.scrollHeight;
-      setTimeout(typeChar, delay);
+    if (timeLeft <= 10) {
+        countdownDiv.style.color = "#f00";
     } else {
-      if (callback) callback();
+        countdownDiv.style.color = "#00ff00";
     }
-  }
-  typeChar();
+
+    if (timeLeft <= 5 && timeLeft > 0) {
+        countdownDiv.classList.add("blink");
+    } else {
+        countdownDiv.classList.remove("blink");
+    }
 }
 
-function printPrompt() {
-  const prompt = document.createElement("div");
-  prompt.className = "prompt-line";
-
-  const prefix = document.createElement("span");
-  prefix.className = "green";
-  prefix.textContent = "agent@shr:~$ ";
-
-  const activeInput = document.createElement("span");
-  activeInput.id = "active-input";
-  activeInput.textContent = "";
-
-  prompt.appendChild(prefix);
-  prompt.appendChild(activeInput);
-  terminal.appendChild(prompt);
-  terminal.scrollTop = terminal.scrollHeight;
-
-  input.value = "";
-
-  input.oninput = () => {
-    activeInput.textContent = input.value;
-  };
-
-  input.focus();
-}
-
-function processInput(value) {
-  printLine(`agent@shr:~$ ${value}`);
-  if (value.trim().toLowerCase() === phases[currentPhase].expected) {
-    currentPhase++;
-    // ✅ Start countdown if this phase is marked to trigger it
-    if (phases[currentPhase - 1].startTimer) {
-      startCountdown();
-    }
-    if (currentPhase < phases.length) {
-      setTimeout(() => {
-        function printMessages(index) {
-          if (index < phases[currentPhase].messages.length) {
-            printLine(phases[currentPhase].messages[index], 30, () => printMessages(index + 1));
-          } else {
-            printPrompt();
-          }
+async function processInput(value) {
+    promptLine.remove(); // remove current input line
+    if (value.trim().toLowerCase() === phases[currentPhase].expected) {
+        currentPhase++;
+        if (currentPhase < phases.length) {
+            // ✅ Start timer immediately if this phase has startTimer flag
+            if (phases[currentPhase].startTimer) {
+                startCountdown();
+            }
+            await printMessages(phases[currentPhase].messages);
+        } else {
+            await typeLine("SEQUENCE COMPLETE");
         }
-        printMessages(0);
-      }, 300);
     } else {
-      clearInterval(countdownInterval);
-      const timer = document.getElementById("timer");
-      if (timer) timer.remove();
-      printLine("Mission complete.");
+        await typeLine("INVALID CODE");
+        addPrompt();
     }
-  } else {
-    printLine("Access denied. Try again.");
-  }
-  input.value = "";
 }
 
-function handleKey(e) {
-  if (e.key === "Enter") {
-    const value = input.value;
-    if (value) {
-      processInput(value);
-    }
-  }
+function init() {
+    terminalDiv = document.getElementById("terminal");
+    countdownDiv = document.getElementById("countdown");
+    countdownDiv.style.display = "none";
+
+    printMessages(phases[0].messages);
+
+    document.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            processInput(inputBuffer);
+            inputBuffer = "";
+        } else if (e.key === "Backspace") {
+            inputBuffer = inputBuffer.slice(0, -1);
+            updatePrompt();
+        } else if (e.key.length === 1) {
+            inputBuffer += e.key;
+            updatePrompt();
+        }
+    });
 }
-
-input.addEventListener("keydown", handleKey);
-
-function startBootMessages(index = 0) {
-  if (index < phases[0].messages.length) {
-    printLine(phases[0].messages[index], 30, () => startBootMessages(index + 1));
-  } else {
-    printPrompt();
-  }
-}
-startBootMessages();
-
-const observer = new MutationObserver(() => {
-  input.focus();
-});
-observer.observe(terminal, { childList: true });
