@@ -70,7 +70,8 @@ const phases = [
         "**IF THIS IS THE FIRST TIME THIS PUZZLE IS BEING SOLVED THERE IS A LIVE EXPLOSIVE CHARGE IN THE BOX FR***",
         "\n> enter codename"
     ],
-    expected: "h3ll0"
+    expected: "h3ll0",
+    startTimer: true // ⏱ Start countdown after this phase begins
   },
   {
     messages: [
@@ -214,9 +215,6 @@ function printLine(text, delay = 30, callback) {
       terminal.scrollTop = terminal.scrollHeight;
       setTimeout(typeChar, delay);
     } else {
-      if (text.includes(">> MISSILE LAUNCH CONFIRMED <<")) {
-        startCountdown(); // ⏱ Start timer after missile launch message
-      }
       if (callback) callback();
     }
   }
@@ -253,6 +251,10 @@ function processInput(value) {
   printLine(`agent@shr:~$ ${value}`);
   if (value.trim().toLowerCase() === phases[currentPhase].expected) {
     currentPhase++;
+    // ✅ Start countdown if this phase is marked to trigger it
+    if (phases[currentPhase - 1].startTimer) {
+      startCountdown();
+    }
     if (currentPhase < phases.length) {
       setTimeout(() => {
         function printMessages(index) {
